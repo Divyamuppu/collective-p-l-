@@ -22,12 +22,12 @@ async function main() {
   }
 
   const verticals = [
-    ['Technology', 'TECH'],
-    ['Marketing', 'MKT'],
-    ['Consulting', 'CONS'],
-    ['Design', 'DSGN'],
-    ['Operations', 'OPS'],
-    ['Finance Services', 'FIN'],
+    ['a-tom content studio', 'studio'],
+    ['a-tom social', 'social'],
+    ['Chopshop lab', 'cs'],
+    ['Misfits', 'misfits'],
+    ['Ngen', 'ngen'],
+    ['IRL', 'irl'],
   ];
 
   const categories = ['EMPLOYEE', 'FREELANCER', 'VENDOR', 'SOFTWARE', 'MISC'];
