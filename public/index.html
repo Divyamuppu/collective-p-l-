@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Collective P&L Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+</head>
+<body>
+  <div class="app-shell" id="app-shell">
+    <aside class="sidebar">
+      <a href="/" class="sidebar-brand" data-nav>
+        <img src="/logo.png" alt="a-tom logo" class="sidebar-logo" />
+      </a>
+      <nav class="sidebar-nav">
+        <a href="/" data-nav class="sidebar-link" id="nav-dashboard">
+          <span class="sidebar-link-icon">&#9642;</span> Dashboard
+        </a>
+        <a href="/?view=vendors" data-nav class="sidebar-link" id="nav-vendors">
+          <span class="sidebar-link-icon">&#9642;</span> Vendors
+        </a>
+        <a href="/?view=users" data-nav class="sidebar-link" id="nav-users" style="display:none">
+          <span class="sidebar-link-icon">&#9642;</span> Users
+        </a>
+        <div class="sidebar-section-label">Verticals</div>
+        <div id="sidebar-verticals"></div>
+      </nav>
+    </aside>
+    <div class="main-column">
+      <header>
+        <div class="header-inner">
+          <span class="header-title">Collective P&amp;L</span>
+          <div class="header-right">
+            <span id="refreshed-at" class="refreshed"></span>
+            <div class="user-block">
+              <span id="user-info" class="user-info"></span>
+              <div id="reset-layout-slot"></div>
+            </div>
+          </div>
+        </div>
+      </header>
+      <main id="app">Loading...</main>
+    </div>
+  </div>
+  <script src="/app.js"></script>
+</body>
+</html>

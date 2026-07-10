@@ -1,0 +1,115 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+// EXEC and FINANCE can delete verticals/projects. All logged-in roles can
+// add revenue/expenses and create projects/verticals.
+model User {
+  id           String   @id @default(uuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         String   @default("PROJECT_MANAGER") // EXEC, FINANCE, VERTICAL_HEAD, PROJECT_MANAGER
+  createdAt    DateTime @default(now())
+}
+
+model Vertical {
+  id        String    @id @default(uuid())
+  name      String
+  code      String    @unique
+  projects  Project[]
+  createdAt DateTime  @default(now())
+}
+
+model Project {
+  id         String         @id @default(uuid())
+  name       String
+  vertical   Vertical       @relation(fields: [verticalId], references: [id])
+  verticalId String
+  status     String         @default("ACTIVE")
+  revenue    RevenueEntry[]
+  expenses   ExpenseEntry[]
+  vendors    Vendor[]
+  createdAt  DateTime       @default(now())
+
+  @@index([verticalId])
+}
+
+model RevenueEntry {
+  id        String   @id @default(uuid())
+  project   Project  @relation(fields: [projectId], references: [id])
+  projectId String
+  amount    Float
+  source    String?
+  entryDate DateTime @default(now())
+  createdAt DateTime @default(now())
+
+  @@index([projectId])
+}
+
+// paid is the only status actually stored. "Overdue" is never set manually -
+// it's computed on every read as (!paid && dueDate is in the past), so it's
+// always accurate the moment a due date passes, with nothing to keep in sync.
+model Vendor {
+  id              String    @id @default(uuid())
+  name            String // Name/Service (vendor name)
+  service         String? // what the vendor was paid for, e.g. "Cloud hosting"
+  paymentAmount   Float // Amount
+  invoiceDate     DateTime?
+  dueDate         DateTime // Deadline
+  paid            Boolean   @default(false) // drives computed Payment Status
+  invoiceFile     String? // filename of an uploaded invoice, once attached
+  project         Project?  @relation(fields: [projectId], references: [id])
+  projectId       String?
+  quarter         String? // matches a VendorOption(type: QUARTER).value - not a hard FK, same pattern as ExpenseEntry.category
+  poc             String? // matches a VendorOption(type: POC).value
+  approvedBy      String? // matches a VendorOption(type: APPROVER).value
+  lastPaymentDate DateTime? // Last Payment Done
+  paymentTimeline String? // matches a VendorOption(type: PAYMENT_TIMELINE).value
+  bankDetails     String? // free text: account no., IFSC/SWIFT, bank name, as read off the invoice
+  createdAt       DateTime  @default(now())
+
+  @@index([dueDate])
+}
+
+// Editable dropdown option lists for the Vendor form (POC, Approved by/PM,
+// Quarter, Payment Timeline). Vendor rows store the option's text value
+// directly rather than an id, so renaming an option here updates the label
+// everywhere it's used, and deleting one never breaks an existing vendor row.
+model VendorOption {
+  id        String   @id @default(uuid())
+  type      String // POC, APPROVER, QUARTER, or PAYMENT_TIMELINE
+  value     String
+  createdAt DateTime @default(now())
+
+  @@unique([type, value])
+  @@index([type])
+}
+
+model ExpenseCategory {
+  id        String   @id @default(uuid())
+  key       String   @unique // stable internal key, e.g. EMPLOYEE, or TRAVEL for a custom one
+  name      String   // display name, e.g. "Employee", "Travel"
+  createdAt DateTime @default(now())
+}
+
+model ExpenseEntry {
+  id        String   @id @default(uuid())
+  project   Project  @relation(fields: [projectId], references: [id])
+  projectId String
+  amount    Float
+  // matches an ExpenseCategory.key - not a hard foreign key, so existing
+  // entries keep working even if a category is later renamed or removed
+  category  String
+  note      String?
+  entryDate DateTime @default(now())
+  createdAt DateTime @default(now())
+
+  @@index([projectId])
+  @@index([category])
+}
