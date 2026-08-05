@@ -1,0 +1,105 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id           String   @id @default(uuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         String   @default("PROJECT_MANAGER")
+  createdAt    DateTime @default(now())
+}
+
+model Vertical {
+  id        String    @id @default(uuid())
+  name      String
+  code      String    @unique
+  projects  Project[]
+  createdAt DateTime  @default(now())
+}
+
+model Project {
+  id         String         @id @default(uuid())
+  name       String
+  vertical   Vertical       @relation(fields: [verticalId], references: [id])
+  verticalId String
+  status     String         @default("ACTIVE")
+  revenue    RevenueEntry[]
+  expenses   ExpenseEntry[]
+  vendors    Vendor[]
+  createdAt  DateTime       @default(now())
+
+  @@index([verticalId])
+}
+
+model RevenueEntry {
+  id        String   @id @default(uuid())
+  project   Project  @relation(fields: [projectId], references: [id])
+  projectId String
+  amount    Float
+  source    String?
+  entryDate DateTime @default(now())
+  createdAt DateTime @default(now())
+
+  @@index([projectId])
+}
+
+model Vendor {
+  id              String    @id @default(uuid())
+  name            String
+  service         String?
+  paymentAmount   Float
+  invoiceDate     DateTime?
+  dueDate         DateTime
+  paid            Boolean   @default(false)
+  invoiceFile     String?
+  project         Project?  @relation(fields: [projectId], references: [id])
+  projectId       String?
+  quarter         String?
+  poc             String?
+  approvedBy      String?
+  lastPaymentDate DateTime?
+  paymentTimeline String?
+  bankDetails     String?
+  createdAt       DateTime  @default(now())
+
+  @@index([dueDate])
+}
+
+model VendorOption {
+  id        String   @id @default(uuid())
+  type      String
+  value     String
+  createdAt DateTime @default(now())
+
+  @@unique([type, value])
+  @@index([type])
+}
+
+model ExpenseCategory {
+  id        String   @id @default(uuid())
+  key       String   @unique
+  name      String
+  createdAt DateTime @default(now())
+}
+
+model ExpenseEntry {
+  id        String   @id @default(uuid())
+  project   Project  @relation(fields: [projectId], references: [id])
+  projectId String
+  amount    Float
+  category  String
+  note      String?
+  entryDate DateTime @default(now())
+  createdAt DateTime @default(now())
+
+  @@index([projectId])
+  @@index([category])
+}
